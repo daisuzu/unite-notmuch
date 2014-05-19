@@ -40,7 +40,7 @@ function! notmuch#datetime_from_unix_time(unix_time)
 endfunction
 
 function! notmuch#open_buffer(thread_id)
-    call s:buffer.open(a:thread_id)
+    call s:buffer.open(a:thread_id, {'opener': 'edit'})
     setlocal buftype=nofile
     setlocal syntax=mail
 endfunction
