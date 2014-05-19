@@ -25,7 +25,7 @@ function! s:kind.action_table.open.func(candidates)
                     \ )[0][0]
 
         let output = notmuch#parse_mail(mail)
-        call append(0, output)
+        call notmuch#output_mail(output)
     endif
 endfunction
 

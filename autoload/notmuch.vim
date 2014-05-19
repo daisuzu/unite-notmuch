@@ -41,9 +41,14 @@ endfunction
 
 function! notmuch#open_buffer(thread_id)
     call s:buffer.open(a:thread_id)
-    % delete _
     setlocal buftype=nofile
     setlocal syntax=mail
+endfunction
+
+function! notmuch#output_mail(output)
+    % delete _
+    call append(0, a:output)
+    normal! gg
 endfunction
 
 function! notmuch#parse_mail(mail)
