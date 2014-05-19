@@ -57,7 +57,7 @@ function! notmuch#parse_mail(mail)
     let thread = a:mail[1]
 
     call add(output, 'From: ' . mail.headers.From)
-    call add(output, 'To: ' . mail.headers.To)
+    call add(output, 'To: ' . get(mail.headers, 'To', ''))
     if exists('mail.headers.Cc')
         call add(output, 'Cc: ' . mail.headers.Cc)
     endif
