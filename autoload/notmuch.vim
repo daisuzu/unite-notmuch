@@ -72,6 +72,12 @@ function! notmuch#parse_mail(mail)
         if !exists('body.content')
             continue
         endif
+
+        if type(body.content) == 1
+            call extend(output, split(body.content, "\n"))
+            continue
+        endif
+
         for content in body.content
             if content['content-type'] == 'text/plain' &&
                         \ exists('content.content')
