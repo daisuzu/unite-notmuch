@@ -2,7 +2,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 let s:V = vital#of('notmuch')
+let s:Process = s:V.import('Process')
 let s:JSON = s:V.import('Web.JSON')
+let s:String = s:V.import('Data.String')
 let s:DateTime = s:V.import('DateTime')
 let s:BufferManager = s:V.import('Vim.BufferManager')
 let s:buffer = s:BufferManager.new()
@@ -94,8 +96,8 @@ function! notmuch#parse_mail(mail)
 endfunction
 
 function! notmuch#count(search_term)
-    return vimproc#popen3([g:notmuch_cmd,
-                \ 'count', a:search_term]).stdout.read_line()
+    let cmd = join([g:notmuch_cmd, 'count', a:search_term], ' ')
+    return s:String.chomp(s:Process.system(cmd))
 endfunction
 
 function! notmuch#search_cmd(search_term)
@@ -111,19 +113,14 @@ function! notmuch#search_async(cmd)
     return vimproc#popen3(a:cmd)
 endfunction
 
-function! notmuch#search(search_term)
-    return vimproc#popen3([g:notmuch_cmd,
-                \ 'search', '--format=json', a:search_term]).stdout.read()
-endfunction
-
 function! notmuch#show(search_term)
-    return vimproc#popen3([g:notmuch_cmd,
-                \ 'show', '--format=json', a:search_term]).stdout.read_line()
+    let cmd = join([g:notmuch_cmd, 'show --format=json', a:search_term], ' ')
+    return s:String.chomp(s:Process.system(cmd))
 endfunction
 
 function! notmuch#tag(search_term)
     let cmd = join([g:notmuch_cmd, 'tag', a:search_term], ' ')
-    return vimproc#popen3(cmd)
+    return s:String.chomp(s:Process.system(cmd))
 endfunction
 
 let &cpo = s:save_cpo

@@ -17,6 +17,12 @@ function! s:source.hooks.on_init(args, context)
     endif
 endfunction
 
+function! s:source.hooks.on_close(args, context)
+    if has_key(a:context, 'source__proc')
+        call a:context.source__proc.kill()
+    endif
+endfunction
+
 function! s:source.gather_candidates(args, context)
     if !len(a:args)
         return s:notmuch_folders
