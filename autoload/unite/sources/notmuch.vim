@@ -22,7 +22,7 @@ function! s:source.gather_candidates(args, context)
         return map(deepcopy(notmuch#folders()), '{
                     \   "word": v:val.name,
                     \   "abbr": v:val.name . " [ " . notmuch#count(v:val.pattern) . " ]",
-                    \   "kind": "notmuch",
+                    \   "kind": "notmuch/folder",
                     \   "source__pattern": v:val.pattern,
                     \ }')
     endif
@@ -77,7 +77,7 @@ function! s:source.async_gather_candidates(args, context)
     return map(json, '{
                 \   "word": v:val.subject,
                 \   "abbr": notmuch#datetime_from_unix_time(v:val.timestamp).to_string() . " | " . v:val.subject,
-                \   "kind": "notmuch",
+                \   "kind": "notmuch/mail",
                 \   "source__thread": v:val.thread,
                 \ }')
 endfunction
