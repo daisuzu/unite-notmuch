@@ -6,17 +6,6 @@ let s:source = {
             \   'hooks' : {},
             \ }
 
-function! s:source.hooks.on_init(args, context)
-    if !len(a:args)
-        let s:notmuch_folders = map(deepcopy(notmuch#folders()), '{
-                    \   "word": v:val.name,
-                    \   "abbr": v:val.name . " [ " . notmuch#count(v:val.pattern) . " ]",
-                    \   "kind": "notmuch",
-                    \   "source__pattern": v:val.pattern,
-                    \ }')
-    endif
-endfunction
-
 function! s:source.hooks.on_close(args, context)
     if has_key(a:context, 'source__proc')
         call a:context.source__proc.kill()
@@ -24,32 +13,33 @@ function! s:source.hooks.on_close(args, context)
 endfunction
 
 function! s:source.gather_candidates(args, context)
-    if !len(a:args)
-        return s:notmuch_folders
-    endif
+    let box_name = get(a:args, 0, '')
+    let a:context.source__pattern = get(notmuch#patterns(), box_name)
 
-    if a:args[0] == ''
-        call unite#print_source_message('Canceled.', s:source.name)
+    let pattern = a:context.source__pattern
+    if pattern == ''
         let a:context.is_async = 0
-        return []
+        return map(deepcopy(notmuch#folders()), '{
+                    \   "word": v:val.name,
+                    \   "abbr": v:val.name . " [ " . notmuch#count(v:val.pattern) . " ]",
+                    \   "kind": "notmuch",
+                    \   "source__pattern": v:val.pattern,
+                    \ }')
     endif
 
-    if a:context.is_redraw
-        let a:context.is_async = 1
-    endif
-
-    let cmd = notmuch#search_cmd(a:args[0])
-    call unite#print_source_message('Command-line: ' . cmd, s:source.name)
+    let cmd = notmuch#search_cmd(box_name)
+    call unite#print_source_message('Command-line: ' . cmd, self.name)
 
     let a:context.source__proc = notmuch#search_async(cmd)
+    call a:context.source__proc.stdin.close()
 
-    return self.async_gather_candidates(a:args, a:context)
+    return []
 endfunction
 
 function! s:source.async_gather_candidates(args, context)
     if !has_key(a:context, 'source__proc')
         let a:context.is_async = 0
-        call unite#print_source_message('Completed.', s:source.name)
+        call unite#print_source_message('Completed.', self.name)
         return []
     endif
 
@@ -59,7 +49,7 @@ function! s:source.async_gather_candidates(args, context)
         let errors = filter(stderr.read_lines(-1, 100),
                     \ "v:val !~ '^\\s*$'")
         if !empty(errors)
-            call unite#print_source_error(errors, s:source.name)
+            call unite#print_source_error(errors, self.name)
         endif
     endif
 
@@ -67,10 +57,10 @@ function! s:source.async_gather_candidates(args, context)
     if stdout.eof
         " Disable async.
         let a:context.is_async = 0
-        call unite#print_source_message('Completed.', s:source.name)
+        call unite#print_source_message('Completed.', self.name)
 
         call a:context.source__proc.waitpid()
-   endif
+    endif
 
     let res = join(stdout.read_lines(-1, 100))
     if res == ''
