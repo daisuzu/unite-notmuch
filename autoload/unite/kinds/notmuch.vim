@@ -32,6 +32,7 @@ let s:kind_mail = {
             \   'name': 'notmuch/mail',
             \   'action_table': {},
             \   'default_action': 'open',
+            \   'parents': ['openable'],
             \ }
 
 let s:kind_mail.action_table.open = {
