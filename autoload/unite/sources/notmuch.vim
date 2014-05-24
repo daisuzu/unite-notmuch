@@ -66,14 +66,8 @@ function! s:source.async_gather_candidates(args, context)
     if res == ''
         return []
     endif
-    if res !~# '^['
-        let res = '[' . res
-    endif
-    if res !~# ']$'
-        let res = res . ']'
-    endif
 
-    let json = notmuch#json_decode(res)
+    let json = notmuch#json_decode(notmuch#wellformed_json_str(res))
     return map(json, '{
                 \   "word": v:val.subject,
                 \   "abbr": notmuch#datetime_from_unix_time(v:val.timestamp).to_string() . " | " . v:val.subject,

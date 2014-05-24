@@ -33,6 +33,11 @@ function! notmuch#patterns()
     return patterns
 endfunction
 
+function! notmuch#wellformed_json_str(str)
+    let str = a:str !~# '^[' ? '[' . a:str : a:str
+    return str !~# ']$' ? str . ']' : str
+endfunction
+
 function! notmuch#json_decode(str)
     return s:JSON.decode(a:str)
 endfunction
