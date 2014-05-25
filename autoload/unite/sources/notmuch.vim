@@ -6,20 +6,20 @@ let s:source = {
             \   'hooks' : {},
             \ }
 
-function! s:source.hooks.on_close(args, context)
+function! s:source.hooks.on_close(args, context) "{{{
     if has_key(a:context, 'source__proc')
         call a:context.source__proc.kill()
     endif
-endfunction
+endfunction "}}}
 
-function! s:source.gather_candidates(args, context)
+function! s:source.gather_candidates(args, context) "{{{
     let box_name = get(a:args, 0, '')
     let a:context.source__pattern = get(notmuch#patterns(), box_name)
 
     let pattern = a:context.source__pattern
     if pattern == ''
         let a:context.is_async = 0
-        return map(deepcopy(notmuch#folders()), '{
+        return map(deepcopy(g:notmuch_boxes), '{
                     \   "word": v:val.name,
                     \   "abbr": v:val.name . " [ " . notmuch#count(v:val.pattern) . " ]",
                     \   "kind": "notmuch/folder",
@@ -34,9 +34,9 @@ function! s:source.gather_candidates(args, context)
     call a:context.source__proc.stdin.close()
 
     return []
-endfunction
+endfunction "}}}
 
-function! s:source.async_gather_candidates(args, context)
+function! s:source.async_gather_candidates(args, context) "{{{
     if !has_key(a:context, 'source__proc')
         let a:context.is_async = 0
         call unite#print_source_message('Completed.', self.name)
@@ -67,17 +67,17 @@ function! s:source.async_gather_candidates(args, context)
         return []
     endif
 
-    let json = notmuch#json_decode(notmuch#wellformed_json_str(res))
+    let json = notmuch#json_decode(res)
     return map(json, '{
                 \   "word": v:val.subject,
                 \   "abbr": notmuch#datetime_from_unix_time(v:val.timestamp).to_string() . " | " . v:val.subject,
                 \   "kind": "notmuch/mail",
                 \   "source__thread": v:val.thread,
                 \ }')
-endfunction
+endfunction "}}}
 
 function! unite#sources#notmuch#define()
-    if !executable(notmuch#cmd())
+    if !executable(g:notmuch_cmd)
         return
     endif
 
@@ -90,3 +90,5 @@ endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" vim: foldmethod=marker

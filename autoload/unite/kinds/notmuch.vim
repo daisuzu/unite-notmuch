@@ -1,6 +1,7 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
+" notmuch/folder {{{
 let s:kind_folder = {
             \   'name': 'notmuch/folder',
             \   'action_table': {},
@@ -13,21 +14,21 @@ let s:kind_folder.action_table.open = {
             \ 'is_quit' : 0,
             \ 'is_start' : 0,
             \ }
-
-function! s:kind_folder.action_table.open.func(candidates)
+function! s:kind_folder.action_table.open.func(candidates) "{{{
     call unite#start_temporary([['notmuch', a:candidates.word]])
-endfunction
+endfunction "}}}
 
 let s:kind_folder.action_table.read= {
             \ 'description' : 'read folder',
             \ 'is_selectable' : 0,
             \ }
-
-function! s:kind_folder.action_table.read.func(candidates)
+function! s:kind_folder.action_table.read.func(candidates) "{{{
     let search_term = notmuch#patterns()[a:candidates.word]
     call notmuch#tag('-unread ' . search_term)
-endfunction
+endfunction "}}}
+"}}}
 
+" notmuch/mail {{{
 let s:kind_mail = {
             \   'name': 'notmuch/mail',
             \   'action_table': {},
@@ -39,8 +40,7 @@ let s:kind_mail.action_table.open = {
             \ 'description' : 'open mail',
             \ 'is_selectable' : 0,
             \ }
-
-function! s:kind_mail.action_table.open.func(candidates)
+function! s:kind_mail.action_table.open.func(candidates) "{{{
     let thread_id = get(a:candidates, 'source__thread', -1)
     if thread_id == -1
         return
@@ -54,14 +54,13 @@ function! s:kind_mail.action_table.open.func(candidates)
 
     let output = notmuch#parse_mail(mail)
     call notmuch#output_mail(output)
-endfunction
+endfunction "}}}
 
 let s:kind_mail.action_table.read= {
             \ 'description' : 'read mail',
             \ 'is_selectable' : 0,
             \ }
-
-function! s:kind_mail.action_table.read.func(candidates)
+function! s:kind_mail.action_table.read.func(candidates) "{{{
     let thread_id = get(a:candidates, 'source__thread', -1)
     if thread_id == -1
         return
@@ -69,7 +68,8 @@ function! s:kind_mail.action_table.read.func(candidates)
 
     let search_term = 'thread:' . thread_id
     call notmuch#tag('-unread ' . search_term)
-endfunction
+endfunction "}}}
+"}}}
 
 function! unite#kinds#notmuch#define()
     return [s:kind_folder, s:kind_mail]
@@ -77,3 +77,5 @@ endfunction
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" vim: foldmethod=marker

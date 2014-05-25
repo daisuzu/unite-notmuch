@@ -1,28 +1,12 @@
 let s:save_cpo = &cpo
 set cpo&vim
 
-let s:V = vital#of('notmuch')
-let s:Process = s:V.import('Process')
-let s:JSON = s:V.import('Web.JSON')
-let s:String = s:V.import('Data.String')
-let s:DateTime = s:V.import('DateTime')
-let s:BufferManager = s:V.import('Vim.BufferManager')
-let s:buffer = s:BufferManager.new()
-
 let g:notmuch_cmd = get(g:, 'notmuch_cmd', 'notmuch')
 let g:notmuch_boxes = get(g:, 'notmuch_boxes', [
             \   {'name': 'new'   , 'pattern': 'tag:inbox and tag:unread'},
             \   {'name': 'inbox' , 'pattern': 'tag:inbox and not tag:draft'},
             \   {'name': 'draft' , 'pattern': 'tag:inbox and tag:draft'},
             \ ])
-
-function! notmuch#cmd()
-    return g:notmuch_cmd
-endfunction
-
-function! notmuch#folders()
-    return g:notmuch_boxes
-endfunction
 
 function! notmuch#patterns()
     let patterns = {}
@@ -33,29 +17,13 @@ function! notmuch#patterns()
     return patterns
 endfunction
 
-function! notmuch#wellformed_json_str(str)
-    let str = a:str !~# '^[' ? '[' . a:str : a:str
-    return str !~# ']$' ? str . ']' : str
-endfunction
-
 function! notmuch#json_decode(str)
-    return s:JSON.decode(a:str)
+    let str = s:wellformed_json_str(a:str)
+    return s:get_json().decode(str)
 endfunction
 
 function! notmuch#datetime_from_unix_time(unix_time)
-    return s:DateTime.from_unix_time(a:unix_time)
-endfunction
-
-function! notmuch#open_buffer(thread_id)
-    call s:buffer.open(a:thread_id, {'opener': 'edit'})
-    setlocal buftype=nofile
-    setlocal syntax=mail
-endfunction
-
-function! notmuch#output_mail(output)
-    % delete _
-    call append(0, a:output)
-    normal! gg
+    return s:get_datetime().from_unix_time(a:unix_time)
 endfunction
 
 function! notmuch#parse_mail(mail)
@@ -100,9 +68,21 @@ function! notmuch#parse_mail(mail)
     return output
 endfunction
 
+function! notmuch#open_buffer(thread_id)
+    call s:get_buffer().open(a:thread_id, {'opener': 'edit'})
+    setlocal buftype=nofile
+    setlocal syntax=mail
+endfunction
+
+function! notmuch#output_mail(output)
+    % delete _
+    call append(0, a:output)
+    normal! gg
+endfunction
+
 function! notmuch#count(search_term)
     let cmd = join([g:notmuch_cmd, 'count', a:search_term], ' ')
-    return s:String.chomp(s:Process.system(cmd))
+    return s:notmuch_run(cmd)
 endfunction
 
 function! notmuch#search_cmd(search_term)
@@ -120,13 +100,78 @@ endfunction
 
 function! notmuch#show(search_term)
     let cmd = join([g:notmuch_cmd, 'show --format=json', a:search_term], ' ')
-    return s:String.chomp(s:Process.system(cmd))
+    return s:notmuch_run(cmd)
 endfunction
 
 function! notmuch#tag(search_term)
     let cmd = join([g:notmuch_cmd, 'tag', a:search_term], ' ')
-    return s:String.chomp(s:Process.system(cmd))
+    return s:notmuch_run(cmd)
 endfunction
+
+" vital.vim {{{
+function! s:vital()
+    if !exists('s:V')
+        let s:V = vital#of('notmuch')
+    endif
+    return s:V
+endfunction
+
+function! s:get_process()
+    if !exists('s:Process')
+        let s:Process = s:vital().import('Process')
+    endif
+    return s:Process
+endfunction
+
+function! s:get_json()
+    if !exists('s:JSON')
+        let s:JSON = s:vital().import('Web.JSON')
+    endif
+    return s:JSON
+endfunction
+
+function! s:get_string()
+    if !exists('s:String')
+        let s:String = s:vital().import('Data.String')
+    endif
+    return s:String
+endfunction
+
+function! s:get_datetime()
+    if !exists('s:DateTime')
+        let s:DateTime = s:vital().import('DateTime')
+    endif
+    return s:DateTime
+endfunction
+
+function! s:get_buffermanager()
+    if !exists('s:BufferManager')
+        let s:BufferManager = s:vital().import('Vim.BufferManager')
+    endif
+    return s:BufferManager
+endfunction
+
+function! s:get_buffer()
+    if !exists('s:Buffer')
+        let s:Buffer = s:get_buffermanager().new()
+    endif
+    return s:Buffer
+endfunction
+" }}}
+
+" internal functions {{{
+function! s:wellformed_json_str(str)
+    let str = a:str !~# '^[' ? '[' . a:str : a:str
+    return str !~# ']$' ? str . ']' : str
+endfunction
+
+function! s:notmuch_run(cmd)
+    return s:get_string().chomp(
+                \ s:get_process().system(a:cmd))
+endfunction
+" }}}
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
+
+" vim: foldmethod=marker
