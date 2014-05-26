@@ -8,6 +8,10 @@ let g:notmuch_boxes = get(g:, 'notmuch_boxes', [
             \   {'name': 'draft' , 'pattern': 'tag:inbox and tag:draft'},
             \ ])
 
+function! notmuch#is_executable()
+    return executable(g:notmuch_cmd)
+endfunction
+
 function! notmuch#patterns()
     let patterns = {}
     for box in g:notmuch_boxes

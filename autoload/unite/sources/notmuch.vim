@@ -77,7 +77,7 @@ function! s:source.async_gather_candidates(args, context) "{{{
 endfunction "}}}
 
 function! unite#sources#notmuch#define()
-    if !executable(g:notmuch_cmd)
+    if !notmuch#is_executable()
         return
     endif
 
