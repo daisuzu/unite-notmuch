@@ -76,6 +76,8 @@ function! notmuch#open_buffer(thread_id)
     call s:get_buffer().open(a:thread_id, {'opener': 'edit'})
     setlocal buftype=nofile
     setlocal syntax=mail
+    setlocal foldmethod=expr
+    setlocal foldexpr=s:fde_mail(v:lnum)
 endfunction
 
 function! notmuch#output_mail(output)
@@ -172,6 +174,19 @@ endfunction
 function! s:notmuch_run(cmd)
     return s:get_string().chomp(
                 \ s:get_process().system(a:cmd))
+endfunction
+
+function! s:fde_mail(lnum)
+    let line = getline(a:lnum)
+
+    if line =~# '^From:'
+        return a:lnum == 1 ? 0 : 1
+    endif
+    if line =~# '^=========================$'
+        return '<1'
+    endif
+
+    return '='
 endfunction
 " }}}
 
