@@ -67,7 +67,9 @@ function! notmuch#parse_mail(mail)
 
     if len(thread)
         call add(output, '=========================')
-        call extend(output, notmuch#parse_mail(thread[0]))
+        for t in thread
+            call extend(output, notmuch#parse_mail(t))
+        endfor
     endif
     return output
 endfunction
