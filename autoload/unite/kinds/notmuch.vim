@@ -14,8 +14,8 @@ let s:kind_folder.action_table.open = {
             \ 'is_quit' : 0,
             \ 'is_start' : 0,
             \ }
-function! s:kind_folder.action_table.open.func(candidates) "{{{
-    call unite#start_temporary([['notmuch', a:candidates.word]])
+function! s:kind_folder.action_table.open.func(candidate) "{{{
+    call unite#start_temporary([['notmuch', a:candidate.word]])
 endfunction "}}}
 
 let s:kind_folder.action_table.read= {
@@ -41,8 +41,8 @@ let s:kind_mail.action_table.open = {
             \ 'description' : 'open mail',
             \ 'is_selectable' : 0,
             \ }
-function! s:kind_mail.action_table.open.func(candidates) "{{{
-    let thread_id = get(a:candidates, 'source__thread', -1)
+function! s:kind_mail.action_table.open.func(candidate) "{{{
+    let thread_id = get(a:candidate, 'source__thread', -1)
     if thread_id == -1
         return
     endif
