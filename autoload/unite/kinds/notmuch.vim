@@ -11,8 +11,8 @@ let s:kind_folder = {
 let s:kind_folder.action_table.open = {
             \ 'description' : 'open folder',
             \ 'is_selectable' : 0,
-            \ 'is_quit' : 0,
-            \ 'is_start' : 0,
+            \ 'is_quit' : 1,
+            \ 'is_start' : 1,
             \ }
 function! s:kind_folder.action_table.open.func(candidate) "{{{
     call unite#start_temporary([['notmuch', a:candidate.word]])
@@ -26,6 +26,22 @@ function! s:kind_folder.action_table.read.func(candidates) "{{{
     let search_term = join(map(deepcopy(a:candidates),
                 \ '"\"" . notmuch#patterns()[v:val.word] . "\""'), ' or ')
     call notmuch#tag('-unread ' . search_term)
+endfunction "}}}
+
+let s:kind_folder.action_table.search= {
+            \ 'description' : 'search folder',
+            \ 'is_selectable' : 0,
+            \ 'is_quit' : 1,
+            \ 'is_start' : 1,
+            \ }
+function! s:kind_folder.action_table.search.func(candidate) "{{{
+    let context = unite#get_context()
+    let pattern = input('Input search-term:')
+
+    if len(pattern)
+        let context.source__search = ' and ' . pattern
+    endif
+    call unite#start_script([['notmuch', a:candidate.word]], context)
 endfunction "}}}
 "}}}
 

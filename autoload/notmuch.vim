@@ -98,7 +98,7 @@ function! notmuch#search_cmd(search_term)
                 \   g:notmuch_cmd,
                 \   'search',
                 \   '--format=json',
-                \   notmuch#patterns()[a:search_term],
+                \   a:search_term,
                 \ )
 endfunction
 

@@ -27,7 +27,8 @@ function! s:source.gather_candidates(args, context) "{{{
                     \ }')
     endif
 
-    let cmd = notmuch#search_cmd(box_name)
+    let search_term = notmuch#patterns()[box_name]. get(a:context, 'source__search', '')
+    let cmd = notmuch#search_cmd(search_term)
     call unite#print_source_message('Command-line: ' . cmd, self.name)
 
     let a:context.source__proc = notmuch#search_async(cmd)
