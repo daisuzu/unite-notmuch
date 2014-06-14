@@ -82,6 +82,30 @@ function! s:kind_mail.action_table.read.func(candidates) "{{{
                 \ '"\"thread:" . v:val.source__thread . "\""'), ' or ')
     call notmuch#tag('-unread ' . search_term)
 endfunction "}}}
+
+let s:kind_mail.action_table.preview = {
+            \ 'description' : 'preview mail',
+            \ 'is_quit' : 0,
+            \ }
+function! s:kind_mail.action_table.preview.func(candidates) "{{{
+    let thread_id = get(a:candidates, 'source__thread', -1)
+    if thread_id == -1
+        return
+    endif
+
+    noautocmd silent execute 'pedit!' thread_id
+    wincmd P
+
+    let mail = notmuch#json_decode(
+                \   notmuch#show('thread:' . thread_id)
+                \ )[0][0]
+
+    let output = notmuch#parse_mail(mail)
+    call notmuch#output_mail(output)
+    setlocal nomodified
+    setlocal nobuflisted
+    wincmd p
+endfunction "}}}
 "}}}
 
 function! unite#kinds#notmuch#define()
