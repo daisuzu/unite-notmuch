@@ -28,6 +28,16 @@ function! s:kind_folder.action_table.read.func(candidates) "{{{
     call notmuch#tag('-unread ' . search_term)
 endfunction "}}}
 
+let s:kind_folder.action_table.unread= {
+            \ 'description' : 'unread folder',
+            \ 'is_selectable' : 1,
+            \ }
+function! s:kind_folder.action_table.unread.func(candidates) "{{{
+    let search_term = join(map(deepcopy(a:candidates),
+                \ '"\"" . notmuch#patterns()[v:val.word] . "\""'), ' or ')
+    call notmuch#tag('+unread ' . search_term)
+endfunction "}}}
+
 let s:kind_folder.action_table.search= {
             \ 'description' : 'search folder',
             \ 'is_selectable' : 0,
@@ -81,6 +91,16 @@ function! s:kind_mail.action_table.read.func(candidates) "{{{
     let search_term = join(map(deepcopy(a:candidates),
                 \ '"\"thread:" . v:val.source__thread . "\""'), ' or ')
     call notmuch#tag('-unread ' . search_term)
+endfunction "}}}
+
+let s:kind_mail.action_table.unread= {
+            \ 'description' : 'unread mail',
+            \ 'is_selectable' : 1,
+            \ }
+function! s:kind_mail.action_table.unread.func(candidates) "{{{
+    let search_term = join(map(deepcopy(a:candidates),
+                \ '"\"thread:" . v:val.source__thread . "\""'), ' or ')
+    call notmuch#tag('+unread ' . search_term)
 endfunction "}}}
 
 let s:kind_mail.action_table.preview = {
