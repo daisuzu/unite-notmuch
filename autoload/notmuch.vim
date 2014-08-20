@@ -32,13 +32,21 @@ endfunction
 
 function! notmuch#parse_mail(mail)
     let output = []
+    for m in a:mail
+        call extend(output, s:parse_mail(m))
+    endfor
+    return output
+endfunction
+
+function! s:parse_mail(mail)
+    let output = []
 
     if !len(a:mail)
         return output
     endif
 
     let mail = a:mail[0]
-    let thread = a:mail[1]
+    let threads = a:mail[1:]
 
     call add(output, 'From: ' . mail.headers.From)
     call add(output, 'To: ' . get(mail.headers, 'To', ''))
@@ -65,10 +73,12 @@ function! notmuch#parse_mail(mail)
         endfor
     endfor
 
-    if len(thread)
-        call add(output, '=========================')
-        for t in thread
-            call extend(output, notmuch#parse_mail(t))
+    if len(threads)
+        for thread in threads
+            call add(output, '=========================')
+            for t in thread
+                call extend(output, s:parse_mail(t))
+            endfor
         endfor
     endif
     return output

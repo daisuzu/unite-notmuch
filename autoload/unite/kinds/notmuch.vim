@@ -77,7 +77,7 @@ function! s:kind_mail.action_table.open.func(candidate) "{{{
 
     let mail = notmuch#json_decode(
                 \   notmuch#show('thread:' . thread_id)
-                \ )[0][0]
+                \ )[0]
 
     let output = notmuch#parse_mail(mail)
     call notmuch#output_mail(output)
