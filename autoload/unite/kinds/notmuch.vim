@@ -15,7 +15,7 @@ let s:kind_folder.action_table.open = {
             \ 'is_start' : 1,
             \ }
 function! s:kind_folder.action_table.open.func(candidate) "{{{
-    call unite#start_temporary([['notmuch', a:candidate.word]])
+    call unite#start_temporary([['notmuch', a:candidate.word]], {'resume': 0})
 endfunction "}}}
 
 let s:kind_folder.action_table.read= {
@@ -46,6 +46,7 @@ let s:kind_folder.action_table.search= {
             \ }
 function! s:kind_folder.action_table.search.func(candidate) "{{{
     let context = unite#get_context()
+    let context.resume = 0
     let pattern = input('Input search-term:')
 
     if len(pattern)
